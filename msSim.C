@@ -17,6 +17,9 @@ def createScatteringRanges(low,high):
     #print random.gauss(0, 0.1)
     msScatterDistance.sort()
 */
+
+
+
 std::vector<double> createScatteringRanges(std::exponential_distribution<> rng, std::mt19937 & rnd_gen , double pathLength){
 
     std::vector<double> scatter_distances;
@@ -50,8 +53,9 @@ std::vector<double> createScatteringAngles(std::vector<double> scatter_vector, d
 
 TH1F runSim(double x_pos_detector, double y_target_pos, int num, double scatter_angle, std::mt19937 & rnd_gen, std::normal_distribution<double> scatter_angle_dist, std::exponential_distribution<> rng){
 
+
    
-    TH1F TH1F_x_residual = TH1F("TH1F_x_residual", "x residual at ideal position; x; counts", 100, -1,1);
+    TH1F TH1F_x_residual = TH1F(("TH1F_x_residual"+ std::to_string(x_pos_detector)+ std::to_string(y_target_pos)).c_str(), "x residual at ideal position; x; counts", 100, -1,1);
 
     for(int i=0;i<num;i++){
 /*
@@ -118,7 +122,7 @@ TH1F runSim(double x_pos_detector, double y_target_pos, int num, double scatter_
         }
     }
 
-    std::cout << "RMS " << TH1F_x_residual.GetRMS() << " mean " << TH1F_x_residual.GetMean() << std::endl;
+    
     TH1F_x_residual.Draw();
     //c1->SaveAs( (std::string("output/TH1F_x_residual_xpos_") + std::to_string(x_pos_detector) +std::string("_ypos_") + std::to_string(y_target_pos)  + std::string(".png" )).c_str() ) ;
 
@@ -131,6 +135,9 @@ TH1F runSim(double x_pos_detector, double y_target_pos, int num, double scatter_
 
 
 int msSim(){
+
+    gROOT->SetBatch(true);
+
     double x_pos_detector = 1.0;
     double y_target_pos  = 1.0;
     double pathLength = sqrt(x_pos_detector*x_pos_detector + y_target_pos*y_target_pos);
@@ -157,80 +164,15 @@ int msSim(){
     std::vector<double> scatter_vector;
 
    
-    TH1F *Temp = (TH1F*) runSim( x_pos_detector,  y_target_pos,  num,  scatter_angle, rnd_gen, scatter_angle_dist,  rng).Clone();
+    for(int i = 0 ;i < 10; i++){
+
+    TH1F *Temp = (TH1F*) runSim( x_pos_detector,  (double)i - 5.0,  num,  scatter_angle, rnd_gen, scatter_angle_dist,  rng).Clone();
+    std::cout << "RMS " << Temp->GetRMS() << " mean " << Temp->GetMean() << std::endl;
     Temp->Draw();
-    c1.SaveAs( (std::string("output/TH1F_x_residual_xpos_") + std::to_string(x_pos_detector) +std::string("_ypos_") + std::to_string(y_target_pos)  + std::string(".png" )).c_str() ) ;
-
-
-    //for(int i=0;i<num;i++){
-/*
-        scatter_vector = createScatteringRanges(rng,rnd_gen, pathLength);
-        createScatteringAngles(scatter_vector, scatter_angle, rnd_gen, scatter_dist);
-*/
-/*
-        std::vector<double> scatter_distances;
-        double scatter_distance;
-        double total_distance = 0;
-        std::vector<double> scattering_angles_vector;
-        double x_pos = 0;
-        double y_pos = 0;
-
-        std::vector<double> x_pos_vec;
-        std::vector<double> y_pos_vec;
-
-
-        double x_distance;
-        double y_distance;
-        double scatter_angle_l;
-
-        double angle = atan(y_target_pos/x_pos_detector);
-        while(true){
-            scatter_distance = (double) rng (rnd_gen) * 4;
-
-            scatter_angle_l = scatter_angle_dist(rnd_gen);
-
-            //std::cout << scatter_angle_l << " " << scatter_distance << " " << x_pos << " "  << y_pos  << std::endl;
-    
-            total_distance = total_distance + scatter_distance;
-
-            x_pos = scatter_distance*cos(angle) + x_pos;
-            y_pos = scatter_distance*sin(angle) + y_pos;
-
-            angle = angle + scatter_angle_l;
-
-            x_pos_vec.push_back(x_pos);
-            y_pos_vec.push_back(y_pos);
-
-            if(x_pos > x_pos_detector){
-                x_distance = x_pos_detector - x_pos_vec.at(x_pos_vec.size() -2);
-
-                y_distance = x_distance*y_pos/x_pos + y_pos_vec.at(y_pos_vec.size() -2);
-
-                x_distance = x_distance + x_pos_vec.at(x_pos_vec.size() -2);
-
-                break;
-            }
-
-        }
-        TH1F_x_residual->Fill(y_distance- y_target_pos);
-    
-        //std::cout << TH1F_x_residual->GetEntries() << std::endl;
-
-        std::cout << scatter_angle_l << " " << scatter_distance << " " << x_pos << " "  << y_pos  <<" " << x_distance << " " << y_distance<<  " " << y_distance- y_target_pos << std::endl;
-
-        
-        
-        if(i*10 % num == 0){
-            std::cout <<  (double)i/(double)num << std::endl;
-            
-        }
+    c1.SaveAs( (std::string("output/TH1F_x_residual_xpos_") + std::to_string(x_pos_detector) +std::string("_ypos_") + std::to_string( (double)i - 5.0 )   + std::string(".png" )).c_str() ) ;  
     }
-   
 
-        std::cout << "RMS " << TH1F_x_residual->GetRMS() << " mean " << TH1F_x_residual->GetMean() << std::endl;
-        TH1F_x_residual->Draw();
-        
-        */
+    
          return 0;
 
 
